@@ -258,7 +258,8 @@ L.control.layers(
   {
     "🏗️ GHS-BUILT (Local)": ghsBuilt,
     "👥 GHS-POP (Local)": ghsPop,
-    "📊 HVI Priority Zones": analysisOverlay,
+    "📊 HVI Priority Zones": globalHviLayer,
+    
     "⛰️ Hillshade": hillshade,
     "💧 Watercolor": watercolor
   },
@@ -377,3 +378,56 @@ map.on('click', function (e) {
 });
 
 console.log('✅ Map loaded successfully. Planning Tools now highlight wards interactively!');
+// ====================
+// Global HVI Zones Layer
+// ====================
+let globalHviLayer = L.layerGroup();
+
+function loadGlobalHviZones() {
+  fetch('./global_hvi_zones.geojson')
+    .then(response => response.json())
+    .then(data => {
+      globalHviLayer.clearLayers();
+      L.geoJSON(data, {
+        style: function(feature) {
+          let color = '#e74c3c';
+          if (feature.properties && feature.properties.risk) {
+            if (feature.properties.risk === 'low') color = '#27ae60';
+            else if (feature.properties.risk === 'medium') color = '#2980b9';
+            else if (feature.properties.risk === 'high') color = '#f39c12';
+            else if (feature.properties.risk === 'critical') color = '#e74c3c';
+          }
+          return {
+            color: color,
+            weight: 2,
+            fillOpacity: 0.3
+          };
+        },
+        onEachFeature: function(feature, layer) {
+          let props = feature.properties || {};
+          let html = `<b>Zone:</b> ${props.name || 'N/A'}<br>`;
+          if (props.risk) html += `<b>Risk:</b> ${props.risk}<br>`;
+          if (props.population) html += `<b>Population:</b> ${props.population}<br>`;
+          layer.bindPopup(html);
+        }
+      }).addTo(globalHviLayer);
+
+      // Fit to global bounds if valid
+      try {
+        let bounds = globalHviLayer.getBounds();
+        if (bounds.isValid()) map.fitBounds(bounds, {maxZoom: 4});
+      } catch(e) { /* ignore */ }
+    });
+}
+
+map.on('overlayadd', function(e) {
+  if (e.name && e.name.includes('HVI Priority Zones')) {
+    loadGlobalHviZones();
+    globalHviLayer.addTo(map);
+  }
+});
+map.on('overlayremove', function(e) {
+  if (e.name && e.name.includes('HVI Priority Zones')) {
+    map.removeLayer(globalHviLayer);
+  }
+});
