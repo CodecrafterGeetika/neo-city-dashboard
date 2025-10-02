@@ -1,0 +1,13 @@
+{
+  "name": "pop",
+  "version": "1.1.0",
+  "description": "",
+  "attribution": "<a href=\"https://www.maptiler.com/engine/\">Rendered with MapTiler Engine</a>",
+  "type": "overlay",
+  "format": "png",
+  "minzoom": "4",
+  "maxzoom": "10",
+  "scale": "1.000000",
+  "bounds": [81.44027621, 16.25908112, 94.78722451, 24.55255376],
+  "profile": "mercator"
+}
