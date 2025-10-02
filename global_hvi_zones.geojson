@@ -1,0 +1,145 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Delhi Urban Agglomeration",
+          "risk": "critical",
+          "population": 30291000
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [76.8, 28.4],
+              [77.5, 28.4],
+              [77.5, 28.9],
+              [76.8, 28.9],
+              [76.8, 28.4]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Cairo Metro",
+          "risk": "high",
+          "population": 20484965
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [31.1, 29.9],
+              [31.5, 29.9],
+              [31.5, 30.2],
+              [31.1, 30.2],
+              [31.1, 29.9]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "São Paulo Metro",
+          "risk": "high",
+          "population": 22429800
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-46.8, -24.0],
+              [-46.2, -24.0],
+              [-46.2, -23.4],
+              [-46.8, -23.4],
+              [-46.8, -24.0]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "London Metro",
+          "risk": "medium",
+          "population": 11289000
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-0.5, 51.2],
+              [0.5, 51.2],
+              [0.5, 51.7],
+              [-0.5, 51.7],
+              [-0.5, 51.2]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "New York Metro",
+          "risk": "medium",
+          "population": 18804000
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-74.5, 40.3],
+              [-73.5, 40.3],
+              [-73.5, 41.0],
+              [-74.5, 41.0],
+              [-74.5, 40.3]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sydney Metro",
+          "risk": "low",
+          "population": 5312163
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [150.7, -34.1],
+              [151.4, -34.1],
+              [151.4, -33.6],
+              [150.7, -33.6],
+              [150.7, -34.1]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Shanghai Metro",
+          "risk": "critical",
+          "population": 24870000
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [120.8, 30.8],
+              [122.1, 30.8],
+              [122.1, 31.8],
+              [120.8, 31.8],
+              [120.8, 30.8]
+            ]
+          ]
+        }
+      }
+    ]
+  }
