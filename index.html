@@ -6,8 +6,8 @@
   <title>Neo City Dashboard - Smart Urban Planning with NASA Earth Data</title>
   
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
   
   <style>
@@ -17,13 +17,9 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f5f5f5;
     }
-    
-    /* Header */
     .header {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 70px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -34,474 +30,120 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       backdrop-filter: blur(10px);
     }
-    
-    .header h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 700;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .header .subtitle {
-      margin-left: 20px;
-      font-size: 14px;
-      opacity: 0.95;
-      font-weight: 300;
-    }
-    
-    /* Control Panel */
+    .header h1 { margin: 0; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+    .header .subtitle { margin-left: 20px; font-size: 14px; opacity: 0.95; font-weight: 300;}
     .control-panel {
       position: fixed;
-      top: 70px;
-      left: 0;
-      width: 350px;
-      height: calc(100vh - 70px);
+      top: 70px; left: 0;
+      width: 350px; height: calc(100vh - 70px);
       background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
       box-shadow: 4px 0 25px rgba(0,0,0,0.15);
-      z-index: 999;
-      overflow-y: auto;
+      z-index: 999; overflow-y: auto;
       transform: translateX(-100%);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       border-right: 1px solid rgba(255,255,255,0.2);
     }
-    
-    .control-panel.open {
-      transform: translateX(0);
-    }
-    
+    .control-panel.open { transform: translateX(0);}
     .toggle-panel {
-      position: fixed;
-      top: 85px;
-      left: 15px;
-      z-index: 1001;
+      position: fixed; top: 85px; left: 15px; z-index: 1001;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-      cursor: pointer;
-      font-size: 20px;
+      color: white; border: none; border-radius: 50%;
+      width: 50px; height: 50px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+      cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
       transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    
-    .toggle-panel:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
-    }
-    
-    .panel-section {
-      padding: 20px;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      transition: background-color 0.2s ease;
-    }
-    
-    .panel-section:hover {
-      background-color: rgba(102, 126, 234, 0.02);
-    }
-    
-    .panel-section h3 {
-      margin: 0 0 15px 0;
-      color: #2c3e50;
-      font-size: 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    /* Map Container */
+    .toggle-panel:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);}
+    .panel-section { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.08);}
+    .panel-section h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;}
     #map {
-      position: absolute;
-      top: 70px;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      height: calc(100vh - 70px);
-      border-radius: 0;
+      position: absolute; top: 70px; bottom: 0; left: 0; right: 0;
+      width: 100%; height: calc(100vh - 70px); border-radius: 0;
     }
-    
-    /* Citizen Reporting */
     .citizen-report {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
+      bottom: 20px; right: 20px; z-index: 1000;
     }
-    
     .report-btn {
       background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 15px 25px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
+      color: white; border: none; border-radius: 50px;
+      padding: 15px 25px; font-size: 15px; font-weight: 700; cursor: pointer;
       box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
-    
     .report-btn:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
       background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
     }
-    
-    /* NASA Data Indicators */
     .nasa-indicators {
-      position: fixed;
-      top: 85px;
-      right: 20px;
-      z-index: 999;
+      position: fixed; top: 85px; right: 20px; z-index: 999;
       background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      min-width: 220px;
-      border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
+      border-radius: 15px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      min-width: 220px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);
     }
-    
     .nasa-indicators h4 {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: 700;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; font-weight: 700;
     }
-    
     .indicator {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-      font-size: 12px;
+      display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px;
     }
-    
-    .indicator-value {
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 12px;
-      color: white;
-    }
-    
+    .indicator-value { font-weight: 600; padding: 2px 8px; border-radius: 12px; color: white;}
     .good { background: #4caf50; }
     .moderate { background: #ff9800; }
     .poor { background: #f44336; }
     .excellent { background: #2196f3; }
-    
-    /* Planning Tool Buttons */
     .planning-btn {
-      width: 100%;
-      margin: 8px 0;
-      padding: 12px 16px;
-      border: none;
-      border-radius: 12px;
+      width: 100%; margin: 8px 0; padding: 12px 16px;
+      border: none; border-radius: 12px;
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      color: #495057;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-align: left;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 1px solid rgba(0,0,0,0.05);
+      color: #495057; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: left;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05);
     }
-    
     .planning-btn:hover {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
-    
-    .planning-btn:active {
-      transform: translateY(0);
-    }
-    
-    /* Ward Highlight Animation */
-    .ward-highlight {
-      animation: pulseHighlight 2s ease-in-out 3;
-    }
-    
+    .planning-btn:active { transform: translateY(0);}
+    .ward-highlight { animation: pulseHighlight 2s ease-in-out 3;}
     @keyframes pulseHighlight {
-      0%, 100% { 
-        transform: scale(1);
-        opacity: 0.9;
-      }
-      50% { 
-        transform: scale(1.2);
-        opacity: 1;
-      }
+      0%, 100% { transform: scale(1); opacity: 0.9;}
+      50% { transform: scale(1.2); opacity: 1;}
     }
-    
-    /* Enhanced Layer Control Styling */
     .leaflet-control-layers {
       background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
-      padding: 15px !important;
-      border-radius: 12px !important;
+      padding: 15px !important; border-radius: 12px !important;
       box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-      border: 1px solid rgba(255,255,255,0.2) !important;
-      backdrop-filter: blur(10px) !important;
-      margin-top: 15px !important;
-      margin-right: 15px !important;
+      border: 1px solid rgba(255,255,255,0.2) !important; backdrop-filter: blur(10px) !important;
+      margin-top: 15px !important; margin-right: 15px !important;
     }
-    
-    .leaflet-control-layers-expanded {
-      padding: 20px !important;
-      min-width: 250px !important;
-      max-width: 280px !important;
-    }
-    
+    .leaflet-control-layers-expanded { padding: 20px !important; min-width: 250px !important; max-width: 280px !important;}
     .leaflet-control-layers-toggle {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      border-radius: 8px !important;
-      width: 40px !important;
-      height: 40px !important;
+      border-radius: 8px !important; width: 40px !important; height: 40px !important;
     }
-    
     .leaflet-control-layers label {
-      font-size: 13px !important;
-      font-weight: 500 !important;
-      color: #2c3e50 !important;
-      margin: 8px 0 !important;
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
+      font-size: 13px !important; font-weight: 500 !important;
+      color: #2c3e50 !important; margin: 8px 0 !important;
+      display: flex !important; align-items: center !important; gap: 8px !important;
     }
-    
-    .leaflet-control-layers input[type="radio"],
-    .leaflet-control-layers input[type="checkbox"] {
-      margin-right: 8px !important;
-      transform: scale(1.2) !important;
+    .leaflet-control-layers input[type="radio"], .leaflet-control-layers input[type="checkbox"] {
+      margin-right: 8px !important; transform: scale(1.2) !important;
     }
-    
-    /* Notification System */
-    .notification {
-      position: fixed;
-      top: 85px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px 25px;
-      border-radius: 25px;
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-      z-index: 10000;
-      font-size: 14px;
-      font-weight: 600;
-      opacity: 0;
-      transition: all 0.3s ease;
-      max-width: 400px;
-      text-align: center;
-    }
-    
-    .notification.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(10px);
-    }
-    
-    /* Analysis Results Panel */
-    .analysis-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-      border-top: 3px solid #667eea;
-      box-shadow: 0 -8px 25px rgba(0,0,0,0.15);
-      z-index: 1000;
-      transform: translateY(100%);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      max-height: 50vh;
-      overflow-y: auto;
-    }
-    
-    .analysis-panel.show {
-      transform: translateY(0);
-    }
-    
-    .analysis-header {
-      padding: 20px 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .analysis-title {
-      font-size: 18px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .close-analysis {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-    
-    .close-analysis:hover {
-      background: rgba(255,255,255,0.3);
-      transform: scale(1.1);
-    }
-    
-    .analysis-content {
-      padding: 30px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-    }
-    
-    .affected-wards {
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 20px;
-      border-left: 4px solid #667eea;
-    }
-    
-    .actions-required {
-      background: #fff5f5;
-      border-radius: 12px;
-      padding: 20px;
-      border-left: 4px solid #ff6b6b;
-    }
-    
-    .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .ward-item {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 10px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 1px solid rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-    }
-    
-    .ward-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    }
-    
-    .ward-name {
-      font-weight: 600;
-      color: #667eea;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-    
-    .ward-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      font-size: 12px;
-      color: #666;
-    }
-    
-    .priority-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .priority-critical {
-      background: #ffebee;
-      color: #c62828;
-    }
-    
-    .priority-high {
-      background: #fff3e0;
-      color: #ef6c00;
-    }
-    
-    .priority-medium {
-      background: #e8f5e8;
-      color: #2e7d32;
-    }
-    
-    .action-item {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 10px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border-left: 4px solid #ff6b6b;
-    }
-    
-    .action-title {
-      font-weight: 600;
-      color: #2c3e50;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-    
-    .action-description {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.4;
-      margin-bottom: 10px;
-    }
-    
-    .nasa-data-source {
-      font-size: 11px;
-      color: #667eea;
-      font-style: italic;
-    }
-    
-    @media (max-width: 768px) {
-      .analysis-content {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 20px;
-      }
-    }
-    
-    /* Style the info panel */
+    /* Info Panel */
     .info-panel {
-      padding: 15px;
-      background: rgba(255,255,255,0.95);
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      max-width: 250px;
-      font-size: 12px;
+      padding: 15px; background: rgba(255,255,255,0.95);
+      border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      max-width: 250px; font-size: 12px;
     }
-    
-    .info-panel h4 {
-      margin: 0 0 10px 0;
-      color: #333;
+    .info-panel h4 { margin: 0 0 10px 0; color: #333;}
+    @media (max-width: 768px) {
+      .control-panel { width: 90vw;}
+      .nasa-indicators { min-width: 140px; padding: 12px;}
+      #map { height: calc(100vh - 70px);}
     }
   </style>
 </head>
@@ -531,7 +173,6 @@
         </ul>
       </div>
     </div>
-
     <!-- Planning Tools Section -->
     <div class="panel-section">
       <h3>🏗️ Planning Tools</h3>
@@ -540,8 +181,8 @@
       <button onclick="showAnalysis('green')" class="planning-btn">🌳 Green Space Optimization</button>
       <button onclick="showAnalysis('flood')" class="planning-btn">🌊 Flood Risk Assessment</button>
       <button onclick="showAnalysis('growth')" class="planning-btn">📈 Urban Growth Projection</button>
+      <button onclick="showAnalysis('reset')" class="planning-btn">🔄 Reset Highlights</button>
     </div>
-
     <!-- Stakeholder Engagement -->
     <div class="panel-section">
       <h3>👥 Stakeholder Involvement</h3>
@@ -557,7 +198,6 @@
         <p><strong>Community Input:</strong> Citizen reporting system for local insights</p>
       </div>
     </div>
-
     <!-- Priority Actions -->
     <div class="panel-section">
       <h3>⚡ Priority Actions</h3>
@@ -601,803 +241,21 @@
 
   <!-- Citizen Reporting -->
   <div class="citizen-report">
-    <button class="report-btn" onclick="openCitizenReport()">📱 Report Issue</button>
-  </div>
-
-
-  <!-- Analysis Results Panel -->
-  <div class="analysis-panel" id="analysisPanel">
-    <div class="analysis-header">
-      <div class="analysis-title" id="analysisTitle">
-        <span id="analysisEmoji">🏗️</span>
-        <span id="analysisName">Planning Analysis</span>
-      </div>
-      <button class="close-analysis" onclick="closeAnalysisPanel()">×</button>
-    </div>
-    <div class="analysis-content">
-      <div class="affected-wards">
-        <div class="section-title">
-          <span>📍</span>
-          <span>Affected Wards</span>
-        </div>
-        <div id="wardsList"></div>
-      </div>
-      <div class="actions-required">
-        <div class="section-title">
-          <span>⚡</span>
-          <span>Required Actions</span>
-        </div>
-        <div id="actionsList"></div>
-      </div>
-    </div>
+    <button class="report-btn" onclick="alert('Citizen reporting is not yet implemented.');">📱 Report Issue</button>
   </div>
 
   <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
-
+  <!-- App Logic -->
+  <script src="app.js"></script>
   <script>
-    // ====================
-    // Map Initialization
-    // ====================
-    const map = L.map('map').setView([17.6868, 83.2185], 10);
-
-    // ====================
-    // Base Layers
-    // ====================
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(map);
-
-    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri',
-      maxZoom: 19
-    });
-
-    const cartoDB = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CartoDB',
-      subdomains: 'abcd',
-      maxZoom: 20
-    });
-
-    const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap',
-      maxZoom: 17
-    });
-
-    // ====================
-    // Local Data Layers
-    // ====================
-    const ghsBuilt = L.tileLayer('./tiles_built/{z}/{x}/{y}.png', {
-      attribution: '© GHS-BUILT / Copernicus',
-      maxZoom: 18,
-      opacity: 0.7
-    });
-
-    const ghsPop = L.tileLayer('./pop/{z}/{x}/{y}.png', {
-      attribution: '© GHS-POP / Copernicus',
-      maxZoom: 18,
-      opacity: 0.7
-    });
-
-    // ====================
-    // Working Overlay Layers
-    // ====================
-    const terrainLines = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_lines/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; Stamen Design',
-      opacity: 0.6,
-      maxZoom: 18
-    });
-
-    const hillshade = L.tileLayer('https://tiles.wmflabs.org/hillshading/{z}/{x}/{y}.png', {
-      attribution: 'Hillshading: SRTM3 v2',
-      opacity: 0.5,
-      maxZoom: 16
-    });
-
-    const stamenToner = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lines/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; Stamen Design',
-      opacity: 0.5,
-      maxZoom: 20
-    });
-
-    // ====================
-    // Zone Analysis Overlay
-    // ====================
-    const analysisOverlay = L.layerGroup();
-
-    const highDensityZone = L.circle([17.6868, 83.2185], {
-      color: 'red',
-      fillColor: '#f03',
-      fillOpacity: 0.3,
-      radius: 2000
-    }).bindPopup('<b>High Density Zone</b><br>Population: 12,000+<br>Status: Needs green space');
-
-    const growthZone = L.circle([17.6968, 83.2285], {
-      color: 'orange',
-      fillColor: '#ff9800',
-      fillOpacity: 0.3,
-      radius: 1500
-    }).bindPopup('<b>Growth Zone</b><br>Population: 9,000<br>Status: Plan infrastructure');
-
-    const balancedZone = L.circle([17.7068, 83.2385], {
-      color: 'green',
-      fillColor: '#4caf50',
-      fillOpacity: 0.3,
-      radius: 1200
-    }).bindPopup('<b>Balanced Zone</b><br>Population: 5,000<br>Status: Good balance');
-
-    analysisOverlay.addLayer(highDensityZone);
-    analysisOverlay.addLayer(growthZone);
-    analysisOverlay.addLayer(balancedZone);
-
-    // ====================
-    // Layer Control - RADIO BUTTONS + CHECKBOXES
-    // ====================
-    const baseMaps = {
-      "🗺️ Street Map": osm,
-      "🛰️ Satellite": satellite,
-      "🌙 Dark Mode": cartoDB,
-      "⛰️ Topographic": topoMap
-    };
-
-    const overlayMaps = {
-      "🏗️ GHS-BUILT (Local)": ghsBuilt,
-      "👥 GHS-POP (Local)": ghsPop,
-      "📊 Zone Analysis": analysisOverlay,
-      "🗺️ Terrain Lines": terrainLines,
-      "⛰️ Hillshade": hillshade,
-      "🎨 Toner Lines": stamenToner
-    };
-
-    // Add control with better positioning
-    const layerControl = L.control.layers(baseMaps, overlayMaps, {
-      collapsed: true,
-      position: 'topright'
-    }).addTo(map);
-    
-    // Ensure layer control is properly positioned below NASA indicators
-    setTimeout(() => {
-      const layerControlElement = document.querySelector('.leaflet-control-layers');
-      if (layerControlElement) {
-        layerControlElement.style.marginTop = '280px';
-      }
-    }, 100);
-
-    // ====================
-    // Sample GeoJSON Points
-    // ====================
-    const sampleGeoJSON = {
-      "type": "FeatureCollection",
-      "features": [
-        // Healthcare Analysis Wards
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 12 - Araku Valley Tribal", 
-            "population": 3200, 
-            "built_ratio": 0.05,
-            "risk": "low"
-          },
-          "geometry": { "type": "Point", "coordinates": [82.8700, 18.3300] }
-        },
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 6 - Anakapalle Outskirts", 
-            "population": 11000, 
-            "built_ratio": 0.38,
-            "risk": "high"
-          },
-          "geometry": { "type": "Point", "coordinates": [82.9900, 17.6800] }
-        },
-        // Transport Analysis Wards
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 7 - Bheemili Coast", 
-            "population": 4500, 
-            "built_ratio": 0.10,
-            "risk": "low"
-          },
-          "geometry": { "type": "Point", "coordinates": [83.4300, 17.8500] }
-        },
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 8 - Pendurthi Agricultural", 
-            "population": 7200, 
-            "built_ratio": 0.12,
-            "risk": "medium"
-          },
-          "geometry": { "type": "Point", "coordinates": [83.1200, 17.7800] }
-        },
-        // Green Space Analysis Wards
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 4 - Gajuwaka Industrial", 
-            "population": 15000, 
-            "built_ratio": 0.55,
-            "risk": "critical"
-          },
-          "geometry": { "type": "Point", "coordinates": [83.1800, 17.6400] }
-        },
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 1 - City Center", 
-            "population": 12000, 
-            "built_ratio": 0.60,
-            "risk": "high"
-          },
-          "geometry": { "type": "Point", "coordinates": [83.2185, 17.6868] }
-        },
-        // Growth Analysis Wards
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 9 - Madhurawada IT Hub", 
-            "population": 8500, 
-            "built_ratio": 0.35,
-            "risk": "medium"
-          },
-          "geometry": { "type": "Point", "coordinates": [83.3800, 17.7200] }
-        },
-        {
-          "type": "Feature",
-          "properties": { 
-            "name": "Ward 5 - Rushikonda Tech", 
-            "population": 6500, 
-            "built_ratio": 0.15,
-            "risk": "low"
-          },
-          "geometry": { "type": "Point", "coordinates": [83.3500, 17.7600] }
-        }
-      ]
-    };
-
-    // Style markers
-    function styleMarker(feature) {
-      const p = feature.properties;
-      let color = 'green';
-      let size = 10;
-      let message = '';
-
-      if (p.population > 10000 && p.built_ratio > 0.5) {
-        color = '#e74c3c';
-        size = 15;
-        message = '⚠️ HIGH PRIORITY - Prioritize green infrastructure';
-      } else if (p.population > 8000 && p.built_ratio < 0.3) {
-        color = '#f39c12';
-        size = 12;
-        message = '⚡ GROWTH AREA - Plan infrastructure early';
-      } else {
-        color = '#27ae60';
-        size = 10;
-        message = '✅ BALANCED - Maintain current balance';
-      }
-
-      return {
-        radius: size,
-        color: '#fff',
-        weight: 2,
-        fillColor: color,
-        fillOpacity: 0.9,
-        popup: `
-          <div style="font-family:Arial; min-width:200px;">
-            <h3 style="margin:0 0 10px 0; color:${color};">${p.name}</h3>
-            <p><b>Population:</b> ${p.population.toLocaleString()}</p>
-            <p><b>Built-up Ratio:</b> ${(p.built_ratio * 100).toFixed(0)}%</p>
-            <p><b>Status:</b> ${message}</p>
-          </div>
-        `
-      };
-    }
-
-    // Add markers and store references
-    const geoJsonLayer = L.geoJSON(sampleGeoJSON, {
-      pointToLayer: function (feature, latlng) {
-        const opts = styleMarker(feature);
-        const marker = L.circleMarker(latlng, opts).bindPopup(opts.popup);
-        wardMarkers.push(marker); // Store for highlighting
-        return marker;
-      }
-    }).addTo(map);
-
-    console.log('Ward markers loaded:', wardMarkers.length);
-    
-    // Test function for debugging
-    window.testAnalysis = function() {
-      console.log('Testing analysis function...');
-      showAnalysis('healthcare');
-    };
-
-    // Info panel removed for cleaner UI
-
-    // Scale control
-    L.control.scale({imperial: false, metric: true}).addTo(map);
-
-    // Click for coordinates
-    map.on('click', function(e) {
-      const lat = e.latlng.lat.toFixed(5);
-      const lng = e.latlng.lng.toFixed(5);
-      L.popup()
-        .setLatLng(e.latlng)
-        .setContent(`📍 <b>Coordinates:</b><br>Lat: ${lat}<br>Lng: ${lng}`)
-        .openOn(map);
-    });
-
-    console.log('✅ Map loaded! Layer controls visible in top-right corner.');
-
-    // ====================
-    // Dashboard Interaction Functions
-    // ====================
-    
-    // Toggle Control Panel
+    // UI panel toggle logic
     function togglePanel() {
       const panel = document.getElementById('controlPanel');
       panel.classList.toggle('open');
     }
-
-    // Store ward markers for highlighting
-    let wardMarkers = [];
-    
-    // Enhanced Analysis Functions with Detailed Panel
-    function showAnalysis(type) {
-      const analysisData = {
-        healthcare: {
-          title: 'Healthcare Access Analysis',
-          emoji: '🏥',
-          wards: [
-            {
-              name: 'Ward 12 - Araku Valley Tribal',
-              population: 3200,
-              distance: '15.2km to nearest facility',
-              priority: 'critical',
-              issues: ['Remote location', 'No local healthcare', 'Tribal population needs']
-            },
-            {
-              name: 'Ward 6 - Anakapalle Outskirts',
-              population: 11000,
-              distance: '4.1km to nearest clinic',
-              priority: 'high',
-              issues: ['Growing population', 'Limited transport', 'Aging infrastructure']
-            }
-          ],
-          actions: [
-            {
-              title: 'Deploy Mobile Health Units',
-              description: 'Establish weekly mobile clinics for Ward 12 with specialized tribal health programs',
-              nasaData: 'VIIRS night lights show infrastructure gaps in remote areas'
-            },
-            {
-              title: 'Build New Primary Health Center',
-              description: 'Construct clinic within 2km radius of Ward 6 to serve 15,000+ residents',
-              nasaData: 'Landsat data shows optimal location near population clusters'
-            },
-            {
-              title: 'Telemedicine Infrastructure',
-              description: 'Install satellite internet and telemedicine facilities for remote consultations',
-              nasaData: 'Population density mapping identifies underserved areas'
-            }
-          ],
-          highlightWards: ['Ward 12 - Araku Valley Tribal', 'Ward 6 - Anakapalle Outskirts']
-        },
-        transport: {
-          title: 'Transportation Planning',
-          emoji: '🚌',
-          wards: [
-            {
-              name: 'Ward 7 - Bheemili Coast',
-              population: 4500,
-              distance: 'Very poor road access',
-              priority: 'critical',
-              issues: ['Coastal isolation', 'No public transport', 'Tourism potential untapped']
-            },
-            {
-              name: 'Ward 8 - Pendurthi Agricultural',
-              population: 7200,
-              distance: 'Poor road infrastructure',
-              priority: 'high',
-              issues: ['Agricultural transport needs', 'Market access limited', 'Seasonal flooding']
-            }
-          ],
-          actions: [
-            {
-              title: 'Coastal Bus Route Extension',
-              description: 'Extend public bus service to Bheemili with 6 daily trips for tourism and local transport',
-              nasaData: 'MODIS data shows clear weather patterns suitable for regular transport'
-            },
-            {
-              title: 'Agricultural Road Development',
-              description: 'Upgrade rural roads in Pendurthi for better market access and flood resilience',
-              nasaData: 'GPM precipitation data identifies flood-prone areas for elevated road design'
-            },
-            {
-              title: 'Smart Traffic Management',
-              description: 'Install IoT-based traffic monitoring for efficient route optimization',
-              nasaData: 'VIIRS night lights track traffic patterns and congestion points'
-            }
-          ],
-          highlightWards: ['Ward 7 - Bheemili Coast', 'Ward 8 - Pendurthi Agricultural']
-        },
-        green: {
-          title: 'Green Space Optimization',
-          emoji: '🌳',
-          wards: [
-            {
-              name: 'Ward 4 - Gajuwaka Industrial',
-              population: 15000,
-              distance: 'Only 8% green space',
-              priority: 'critical',
-              issues: ['Industrial pollution', 'Heat island effect', 'Poor air quality']
-            },
-            {
-              name: 'Ward 1 - City Center',
-              population: 12000,
-              distance: '15% green space',
-              priority: 'high',
-              issues: ['Dense urbanization', 'Limited park space', 'High temperatures']
-            }
-          ],
-          actions: [
-            {
-              title: 'Industrial Green Belt Creation',
-              description: 'Establish 50-hectare green buffer zone around Gajuwaka industrial area',
-              nasaData: 'MODIS air quality data shows pollution concentration patterns'
-            },
-            {
-              title: 'Urban Rooftop Gardens Program',
-              description: 'Mandate green roofs for buildings >3 stories in city center',
-              nasaData: 'Landsat thermal data identifies urban heat island hotspots'
-            },
-            {
-              title: 'Vertical Forest Initiative',
-              description: 'Plant native trees along major roads and create pocket parks',
-              nasaData: 'NDVI analysis shows optimal locations for vegetation growth'
-            }
-          ],
-          highlightWards: ['Ward 4 - Gajuwaka Industrial', 'Ward 1 - City Center']
-        },
-        flood: {
-          title: 'Flood Risk Assessment',
-          emoji: '🌊',
-          wards: [
-            {
-              name: 'Ward 4 - Gajuwaka Industrial',
-              population: 15000,
-              distance: 'High industrial flood risk',
-              priority: 'critical',
-              issues: ['Poor drainage', 'Industrial waste', 'Low-lying area']
-            },
-            {
-              name: 'Ward 7 - Bheemili Coast',
-              population: 4500,
-              distance: 'Coastal flooding risk',
-              priority: 'critical',
-              issues: ['Sea level rise', 'Storm surge', 'Coastal erosion']
-            }
-          ],
-          actions: [
-            {
-              title: 'Enhanced Drainage Systems',
-              description: 'Install smart drainage with IoT sensors and pump stations in Gajuwaka',
-              nasaData: 'GPM precipitation data shows rainfall intensity patterns'
-            },
-            {
-              title: 'Coastal Early Warning System',
-              description: 'Deploy tide gauges and weather stations for real-time flood alerts',
-              nasaData: 'Satellite altimetry tracks sea level changes and storm patterns'
-            },
-            {
-              title: 'Natural Flood Management',
-              description: 'Restore wetlands and create retention ponds for flood control',
-              nasaData: 'Landsat imagery identifies natural water retention areas'
-            }
-          ],
-          highlightWards: ['Ward 4 - Gajuwaka Industrial', 'Ward 7 - Bheemili Coast']
-        },
-        growth: {
-          title: 'Urban Growth Projection',
-          emoji: '📈',
-          wards: [
-            {
-              name: 'Ward 9 - Madhurawada IT Hub',
-              population: 8500,
-              distance: '15% annual growth rate',
-              priority: 'high',
-              issues: ['Rapid development', 'Infrastructure strain', 'IT sector expansion']
-            },
-            {
-              name: 'Ward 5 - Rushikonda Tech',
-              population: 6500,
-              distance: 'Sustainable growth model',
-              priority: 'medium',
-              issues: ['Planned development', 'Tech corridor', 'Balanced growth']
-            }
-          ],
-          actions: [
-            {
-              title: 'Infrastructure Scaling Plan',
-              description: 'Upgrade utilities and transport for projected 25,000 residents by 2025',
-              nasaData: 'VIIRS night lights track urban expansion and development patterns'
-            },
-            {
-              title: 'Sustainable Development Framework',
-              description: 'Implement green building codes and smart city technologies',
-              nasaData: 'Landsat data monitors land use changes and development density'
-            },
-            {
-              title: 'Tech Corridor Integration',
-              description: 'Connect IT hubs with high-speed transport and digital infrastructure',
-              nasaData: 'Population density analysis optimizes service distribution'
-            }
-          ],
-          highlightWards: ['Ward 9 - Madhurawada IT Hub', 'Ward 5 - Rushikonda Tech']
-        }
-      };
-      
-      const analysis = analysisData[type];
-      
-      // Highlight relevant wards
-      highlightWards(analysis.highlightWards, analysis.emoji);
-      
-      // Show analysis notification
-      setTimeout(() => {
-        showNotification(`${analysis.emoji} ${analysis.title} - Check highlighted wards and detailed results below!`);
-      }, 500);
-      
-      // Show detailed analysis panel
-      setTimeout(() => {
-        showAnalysisPanel(analysis);
-      }, 1000);
-    }
-    
-    // Ward Highlighting Function with Navigation
-    function highlightWards(wardNames, emoji) {
-      // Remove previous highlights
-      wardMarkers.forEach(marker => {
-        if (marker.getElement()) {
-          marker.getElement().classList.remove('ward-highlight');
-        }
-      });
-      
-      let highlightedWards = [];
-      
-      // Find and highlight specified wards
-      wardMarkers.forEach((marker, index) => {
-        const popup = marker.getPopup();
-        if (popup && popup.getContent()) {
-          const content = popup.getContent();
-          
-          wardNames.forEach(wardName => {
-            if (content.includes(wardName)) {
-              if (marker.getElement()) {
-                marker.getElement().classList.add('ward-highlight');
-                highlightedWards.push(marker);
-              
-              // Temporarily show emoji overlay
-              const element = marker.getElement();
-              const emojiOverlay = document.createElement('div');
-              emojiOverlay.innerHTML = emoji;
-              emojiOverlay.style.cssText = `
-                position: absolute;
-                top: -10px;
-                right: -10px;
-                font-size: 20px;
-                background: white;
-                border-radius: 50%;
-                width: 30px;
-                height: 30px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                animation: bounceIn 0.5s ease;
-                z-index: 1000;
-              `;
-              
-              element.appendChild(emojiOverlay);
-              
-              // Remove emoji after 4 seconds
-              setTimeout(() => {
-                if (emojiOverlay.parentNode) {
-                  emojiOverlay.parentNode.removeChild(emojiOverlay);
-                }
-              }, 4000);
-              }
-            }
-          });
-        }
-      });
-      
-      // Navigate to highlighted wards
-      if (highlightedWards.length > 0) {
-        // Calculate bounds of all highlighted wards
-        const group = new L.featureGroup(highlightedWards);
-        
-        // Smooth animation to fit all highlighted wards in view
-        setTimeout(() => {
-          map.fitBounds(group.getBounds(), {
-            padding: [50, 50],
-            maxZoom: 12,
-            animate: true,
-            duration: 1.5
-          });
-        }, 200);
-        
-        // Open popup of first highlighted ward after navigation
-        setTimeout(() => {
-          if (highlightedWards[0]) {
-            highlightedWards[0].openPopup();
-          }
-        }, 2000);
-      }
-    }
-
-    // Citizen Reporting System
-    function openCitizenReport() {
-      const issues = [
-        'Air Quality Concern',
-        'Water Supply Issue',
-        'Waste Management Problem',
-        'Transportation Need',
-        'Healthcare Access',
-        'Flooding/Drainage',
-        'Green Space Request',
-        'Infrastructure Damage'
-      ];
-      
-      const selectedIssue = prompt(`🏘️ Citizen Reporting System\n\nSelect issue type (1-${issues.length}):\n\n` + 
-        issues.map((issue, i) => `${i+1}. ${issue}`).join('\n'));
-      
-      if (selectedIssue && selectedIssue >= 1 && selectedIssue <= issues.length) {
-        const location = prompt('📍 Please describe the location or provide coordinates:');
-        if (location) {
-          alert(`✅ Report Submitted!\n\nIssue: ${issues[selectedIssue-1]}\nLocation: ${location}\n\n📋 Your report has been forwarded to the relevant city department and will be integrated into our planning analysis.`);
-          
-          // Add citizen report marker to map
-          const reportMarker = L.marker([17.6868 + (Math.random()-0.5)*0.2, 83.2185 + (Math.random()-0.5)*0.2])
-            .addTo(map)
-            .bindPopup(`<div style="font-family:Arial;">
-              <h4 style="color:#ff6b6b; margin:0;">📱 Citizen Report</h4>
-              <p><strong>Issue:</strong> ${issues[selectedIssue-1]}</p>
-              <p><strong>Location:</strong> ${location}</p>
-              <p><strong>Status:</strong> Under Review</p>
-              <p style="font-size:11px; color:#666;">Reported: ${new Date().toLocaleDateString()}</p>
-            </div>`);
-        }
-      }
-    }
-
-    // Simulate NASA Data Updates
-    function updateNASAData() {
-      const indicators = document.querySelectorAll('.indicator-value');
-      const classes = ['excellent', 'good', 'moderate', 'poor'];
-      const values = ['Excellent', 'Good', 'Moderate', 'Poor'];
-      
-      indicators.forEach(indicator => {
-        // Simulate data fluctuation
-        if (Math.random() > 0.8) {
-          const randomIndex = Math.floor(Math.random() * classes.length);
-          indicator.className = `indicator-value ${classes[randomIndex]}`;
-          indicator.textContent = values[randomIndex];
-        }
-      });
-    }
-
-    // Update NASA data every 30 seconds (simulation)
-    setInterval(updateNASAData, 30000);
-    
-    // Notification System
-    function showNotification(message) {
-      // Remove existing notification
-      const existing = document.querySelector('.notification');
-      if (existing) {
-        existing.remove();
-      }
-      
-      // Create new notification
-      const notification = document.createElement('div');
-      notification.className = 'notification';
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
-      // Show notification
-      setTimeout(() => {
-        notification.classList.add('show');
-      }, 100);
-      
-      // Hide notification after 3 seconds
-      setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-          if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-          }
-        }, 300);
-      }, 3000);
-    }
-
-    // Analysis Panel Functions
-    function showAnalysisPanel(analysis) {
-      const panel = document.getElementById('analysisPanel');
-      const emoji = document.getElementById('analysisEmoji');
-      const name = document.getElementById('analysisName');
-      const wardsList = document.getElementById('wardsList');
-      const actionsList = document.getElementById('actionsList');
-      
-      // Update panel header
-      emoji.textContent = analysis.emoji;
-      name.textContent = analysis.title;
-      
-      // Populate wards list
-      wardsList.innerHTML = '';
-      analysis.wards.forEach(ward => {
-        const wardItem = document.createElement('div');
-        wardItem.className = 'ward-item';
-        wardItem.innerHTML = `
-          <div class="ward-name">${ward.name}</div>
-          <div class="ward-stats">
-            <div><strong>Population:</strong> ${ward.population.toLocaleString()}</div>
-            <div><strong>Status:</strong> ${ward.distance}</div>
-          </div>
-          <div style="margin-top: 8px;">
-            <span class="priority-badge priority-${ward.priority}">${ward.priority}</span>
-          </div>
-          <div style="margin-top: 8px; font-size: 12px; color: #666;">
-            <strong>Issues:</strong> ${ward.issues.join(', ')}
-          </div>
-        `;
-        wardsList.appendChild(wardItem);
-      });
-      
-      // Populate actions list
-      actionsList.innerHTML = '';
-      analysis.actions.forEach(action => {
-        const actionItem = document.createElement('div');
-        actionItem.className = 'action-item';
-        actionItem.innerHTML = `
-          <div class="action-title">${action.title}</div>
-          <div class="action-description">${action.description}</div>
-          <div class="nasa-data-source">📡 NASA Data: ${action.nasaData}</div>
-        `;
-        actionsList.appendChild(actionItem);
-      });
-      
-      // Show panel
-      panel.classList.add('show');
-    }
-
-    function closeAnalysisPanel() {
-      const panel = document.getElementById('analysisPanel');
-      panel.classList.remove('show');
-      
-      // Remove ward highlights
-      wardMarkers.forEach(marker => {
-        marker.getElement().classList.remove('ward-highlight');
-      });
-    }
-
-    // Add bounce animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes bounceIn {
-        0% { transform: scale(0); opacity: 0; }
-        50% { transform: scale(1.2); opacity: 1; }
-        100% { transform: scale(1); opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Welcome Message
-    setTimeout(() => {
-      alert(`🌍 Welcome to Neo City Dashboard!\n\n🎯 Advanced NASA Earth observation data integration for smart urban planning.\n\n✨ Enhanced Features:\n• Interactive planning tools with detailed analysis\n• Ward highlighting and map navigation\n• Comprehensive action recommendations\n• Real-time NASA data integration\n• Professional analysis panel below dashboard\n\n👆 Click the ☰ button and try any planning tool to see:\n• Automatic ward highlighting on map\n• Detailed analysis panel with affected wards\n• Specific actions based on NASA satellite data!`);
-    }, 2000);
-
   </script>
 </body>
 </html>
