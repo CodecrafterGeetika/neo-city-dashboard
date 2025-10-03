@@ -1,860 +1,642 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neo City Dashboard - Smart Urban Planning with NASA Earth Data</title>
-  
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""/>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neo City Dashboard - NASA Earth Observation Analytics</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f5f5;
+    :root {
+      --primary: #2564cf;
+      --secondary: #2d3748;
+      --danger: #f44336;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --bg-light: #f8fafc;
+      --bg-panel: #fff;
+      --border: #e2e8f0;
+      --shadow: 0 2px 16px rgba(60,72,88,0.05);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+    html, body {
+      height: 100%;
+      background: var(--bg-light);
+      font-family: var(--font);
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      min-height: 100vh;
+      margin: 0;
+    }
+    .dashboard-root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Header */
     .header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 70px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      height: 66px;
       padding: 0 30px;
-      z-index: 1000;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      backdrop-filter: blur(10px);
+      z-index: 10;
+      box-shadow: var(--shadow);
+      position: sticky; top: 0; left: 0; right: 0;
     }
-    .header h1 { margin: 0; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
-    .header .subtitle { margin-left: 20px; font-size: 14px; opacity: 0.95; font-weight: 300;}
-    .control-panel {
-      position: fixed;
-      top: 70px; left: 0;
-      width: 350px; height: calc(100vh - 70px);
-      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-      box-shadow: 4px 0 25px rgba(0,0,0,0.15);
-      z-index: 999; overflow-y: auto;
-      transform: translateX(-100%);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border-right: 1px solid rgba(255,255,255,0.2);
+    .header-left {
+      display: flex; align-items: center; gap: 15px;
     }
-    .control-panel.open { transform: translateX(0);}
-    .toggle-panel {
-      position: fixed; bottom: 20px; left: 15px; z-index: 1001;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; border: none; border-radius: 50%;
-      width: 50px; height: 50px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-      cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
-      transition: all 0.3s ease;
+    .logo {
+      font-size: 2rem;
+      margin-right: 8px;
     }
-    .toggle-panel:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);}
-    .panel-section { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.08);}
-    .panel-section h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;}
-    #map {
-      position: absolute; top: 70px; bottom: 0; left: 0; right: 0;
-      width: 100%; height: calc(100vh - 70px); border-radius: 0;
-    }
-    .citizen-report {
-      position: fixed;
-      bottom: 20px; right: 20px; z-index: 1000;
-    }
-    .report-btn {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-      color: white; border: none; border-radius: 50px;
-      padding: 15px 25px; font-size: 15px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .report-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
-      background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
-    }
-    .nasa-indicators {
-      position: fixed; top: 85px; right: 20px; z-index: 999;
-      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 15px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      min-width: 220px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);
-    }
-    .nasa-indicators h4 {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; font-weight: 700;
-    }
-    .indicator {
-      display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px;
-    }
-    .indicator-value { font-weight: 600; padding: 2px 8px; border-radius: 12px; color: white;}
-    .good { background: #4caf50; }
-    .moderate { background: #ff9800; }
-    .poor { background: #f44336; }
-    .excellent { background: #2196f3; }
-    .planning-btn {
-      width: 100%; margin: 8px 0; padding: 12px 16px;
-      border: none; border-radius: 12px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      color: #495057; font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: left;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05);
-    }
-    .planning-btn:hover {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    .planning-btn:active { transform: translateY(0);}
-    .ward-highlight { animation: pulseHighlight 2s ease-in-out 3;}
-    @keyframes pulseHighlight {
-      0%, 100% { transform: scale(1); opacity: 0.9;}
-      50% { transform: scale(1.2); opacity: 1;}
-    }
-    .leaflet-control-layers {
-      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
-      padding: 15px !important; border-radius: 12px !important;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-      border: 1px solid rgba(255,255,255,0.2) !important; backdrop-filter: blur(10px) !important;
-      margin-top: 15px !important; margin-right: 15px !important;
-    }
-    .leaflet-control-layers-expanded { padding: 20px !important; min-width: 250px !important; max-width: 280px !important;}
-    .leaflet-control-layers-toggle {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      border-radius: 8px !important; width: 40px !important; height: 40px !important;
-    }
-    .leaflet-control-layers label {
-      font-size: 13px !important; font-weight: 500 !important;
-      color: #2c3e50 !important; margin: 8px 0 !important;
-      display: flex !important; align-items: center !important; gap: 8px !important;
-    }
-    .leaflet-control-layers input[type="radio"], .leaflet-control-layers input[type="checkbox"] {
-      margin-right: 8px !important; transform: scale(1.2) !important;
-    }
-    /* Info Panel */
-    .info-panel {
-      padding: 15px; background: rgba(255,255,255,0.95);
-      border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      max-width: 250px; font-size: 12px;
-    }
-    .info-panel h4 { margin: 0 0 10px 0; color: #333;}
-    
-    /* WOW FACTOR: Animated NASA Data Stream */
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.9; }
-    }
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5), 0 0 10px rgba(102, 126, 234, 0.3); }
-      50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.4); }
-    }
-    @keyframes satelliteOrbit {
-      0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-3px) rotate(180deg); }
-      100% { transform: translateY(0px) rotate(360deg); }
-    }
-    @keyframes dataStream {
-      0% { opacity: 0; transform: translateY(-10px); }
-      50% { opacity: 1; }
-      100% { opacity: 0; transform: translateY(10px); }
-    }
-    @keyframes numberUpdate {
-      0% { transform: translateY(-20px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-    .satellite-badge {
-      display: inline-block;
-      padding: 3px 8px;
-      background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-      color: white;
-      border-radius: 12px;
-      font-size: 10px;
+    .title {
+      font-size: 1.35rem;
       font-weight: 700;
-      margin: 2px;
-      animation: pulse 3s ease-in-out infinite;
+      color: var(--secondary);
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin-left: 8px;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+    }
+    .header-status {
+      display: flex; align-items: center; gap: 20px;
+    }
+    .status-indicator {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 3px 14px 3px 7px;
+      border-radius: 99px;
+      background: #f4f8fc;
+      color: var(--success);
+      border: none;
+    }
+    .status-indicator .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      display: inline-block;
+      background: var(--success);
+      margin-right: 4px;
+      box-shadow: 0 0 9px #3bc254;
+    }
+    .alert-indicator {
+      color: var(--danger);
+      background: #fff5f5;
+      border: none;
+      border-radius: 99px;
+      padding: 3px 14px 3px 7px;
+      font-size: 15px;
+      font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .alert-indicator .dot {
+      background: var(--danger);
+      width: 9px; height: 9px; border-radius: 50%;
+      margin-right: 4px;
+      display: inline-block;
+      box-shadow: 0 0 9px #f44336;
+    }
+    .header-controls {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 7px;
+      margin-left: 3px;
+      border-radius: 50%;
+      font-size: 1.25rem;
+      color: #667eea;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .icon-btn:active,
+    .icon-btn:hover {
+      background: #e6f0fe;
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: flex;
+      flex: 1;
+      padding: 30px 18px 18px 18px;
+      gap: 22px;
+    }
+    .panel {
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 22px 18px 22px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+    }
+    /* Left Panel: Environmental Metrics */
+    .left-panel {
+      flex: 0 0 350px;
+      min-width: 310px;
+      max-width: 390px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .metrics-panel .panel-tabs {
+      display: flex; gap: 10px; margin-bottom: 16px;
+    }
+    .panel-tab {
+      background: #f4f8fc;
+      color: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 18px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      outline: none;
+    }
+    .panel-tab.active, .panel-tab:focus {
+      background: var(--primary);
+      color: #fff;
+    }
+    .metrics-panel .panel-title {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .metrics-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 13px;
+      margin-bottom: 12px;
+    }
+    .metric-card {
+      background: #f9fbfd;
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      text-align: left;
+      box-shadow: 0 1px 6px rgba(80,100,140,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .metric-label {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .metric-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .metric-value.danger { color: var(--danger);}
+    .metric-value.success { color: var(--success);}
+    .metric-value.warning { color: var(--warning);}
+    .metric-badge {
+      font-size: 13px; font-weight: 600; padding: 2px 8px;
+      border-radius: 999px;
+      background: #f7dada; color: var(--danger);
+      margin-left: 4px;
+    }
+    .trend-panel {
+      margin-top: 10px;
+      background: #f7fafc;
+      border-radius: var(--radius-sm);
+      padding: 16px 14px;
+    }
+    .trend-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    /* Simple chart bar */
+    .trend-chart {
+      width: 100%; height: 60px;
+      display: flex; align-items: flex-end; gap: 7px;
+      margin-top: 7px;
+    }
+    .trend-bar {
+      flex: 1;
+      background: linear-gradient(135deg, #aab8ef 0%, #2564cf 100%);
+      border-radius: 6px 6px 0 0;
+      min-width: 7px;
+      transition: height 0.4s;
+    }
+    /* Center Panel: Map */
+    .map-panel {
+      flex: 1 1 0;
+      min-width: 350px;
+      margin: 0 0;
+      position: relative;
+      border-radius: var(--radius);
+      overflow: visible;
+      display: flex; flex-direction: column;
+    }
+    #map {
+      height: 100%;
+      min-height: 540px;
+      width: 100%;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    }
+    .nasa-layers-control {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      background: #fff;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.10);
+      padding: 13px 18px;
+      font-size: 15px;
+      min-width: 180px;
+      z-index: 3;
+      border: 1px solid var(--border);
+    }
+    .nasa-layers-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .nasa-layers-list label {
+      display: flex; align-items: center; gap: 7px; margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .nasa-layers-list input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 16px; height: 16px;
+    }
+    /* Right Panel */
+    .right-panel {
+      flex: 0 0 340px;
+      min-width: 295px;
+      max-width: 370px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    /* Live Data Stream box */
+    .live-data-panel {
+      margin-bottom: 16px;
+      padding-bottom: 13px;
+    }
+    .live-data-header {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .live-data-indicator {
+      background: #f4f8fc;
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      margin-bottom: 7px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px;
     }
     .live-dot {
       display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #4caf50;
-      border-radius: 50%;
-      margin-right: 5px;
-      animation: pulse 2s ease-in-out infinite;
-      box-shadow: 0 0 10px #4caf50;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--success);
+      margin-right: 6px;
+      box-shadow: 0 0 8px #4caf50;
+      animation: pulse 1.7s infinite;
     }
-    .data-stream-line {
-      position: absolute;
-      width: 2px;
-      height: 20px;
-      background: linear-gradient(to bottom, transparent, #667eea, transparent);
-      animation: dataStream 2s linear infinite;
+    @keyframes pulse {
+      0%,100% { opacity: 1;}
+      50% {opacity: 0.5;}
     }
-    .nasa-logo-badge {
-      background: linear-gradient(135deg, #fc3d21 0%, #0b3d91 100%);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: 800;
-      text-align: center;
-      margin: 10px 0;
-      font-size: 14px;
-      letter-spacing: 2px;
-      animation: glow 3s ease-in-out infinite;
-    }
-    .indicator-animated {
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .indicator-value-animated {
-      animation: numberUpdate 0.5s ease-out;
-    }
-    .satellite-icon {
-      display: inline-block;
-      animation: satelliteOrbit 4s linear infinite;
-    }
-    
-    /* WOW FACTOR: Interactive Data Visualization Dashboard */
-    .viz-dashboard {
-      position: fixed;
-      bottom: 20px;
-      left: 80px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,249,250,0.98) 100%);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      z-index: 998;
-      backdrop-filter: blur(10px);
-      min-width: 400px;
-      max-width: 500px;
-      transform: translateY(120%);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .viz-dashboard.open {
-      transform: translateY(0);
-    }
-    .viz-toggle-btn {
-      position: fixed;
-      bottom: 80px;
-      left: 15px;
-      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      cursor: pointer;
-      z-index: 1001;
-      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
-      font-size: 20px;
+    .nasa-sats {
+      margin: 7px 0 4px 0;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
+      gap: 7px;
+      flex-wrap: wrap;
     }
-    .viz-toggle-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(76, 175, 80, 0.6);
-    }
-    .viz-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: 800;
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-    .chart-container {
-      margin: 15px 0;
-      background: #f8f9fa;
-      border-radius: 10px;
-      padding: 15px;
-    }
-    .chart-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
-    .bar-chart {
-      display: flex;
-      align-items: flex-end;
-      height: 80px;
-      gap: 4px;
-      margin-top: 8px;
-    }
-    .bar {
-      flex: 1;
-      background: linear-gradient(to top, #667eea, #764ba2);
-      border-radius: 4px 4px 0 0;
-      transition: all 0.5s ease;
-      position: relative;
-      animation: barGrow 1s ease-out;
-    }
-    @keyframes barGrow {
-      from { height: 0; }
-    }
-    .line-chart {
-      height: 60px;
-      position: relative;
-      margin-top: 10px;
-    }
-    .line-path {
-      stroke: #667eea;
-      stroke-width: 3;
-      fill: none;
-      stroke-dasharray: 300;
-      stroke-dashoffset: 300;
-      animation: drawLine 2s ease-out forwards;
-    }
-    @keyframes drawLine {
-      to { stroke-dashoffset: 0; }
-    }
-    .metric-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 12px;
-      border-radius: 10px;
-      margin: 8px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      animation: slideIn 0.5s ease-out;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(-20px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .metric-value {
-      font-size: 24px;
-      font-weight: 800;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .metric-label {
+    .sat-badge {
+      background: linear-gradient(135deg,#2b50a1 0%, #2564cf 100%);
+      color: #fff;
       font-size: 11px;
-      opacity: 0.9;
+      padding: 3px 9px;
+      border-radius: 10px;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+      animation: pulse 3s infinite;
     }
-    
-    /* WOW FACTOR: Auto-Demo Mode */
-    .auto-demo-btn {
-      position: fixed;
-      top: 85px;
-      right: 260px;
-      background: linear-gradient(135deg, #fc3d21 0%, #0b3d91 100%);
-      color: white;
+    .live-indicators-list {
+      margin: 6px 0;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .indicator-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; border-radius: 8px;
+    }
+    .indicator-value {
+      font-weight: 700; font-size: 14px; padding: 2px 12px;
+      border-radius: 12px;
+      color: #fff;
+    }
+    .ind-good {background: #4caf50;}
+    .ind-moderate {background: #ff9800;}
+    .ind-bad {background: #f44336;}
+    .ind-excellent {background: #2196f3;}
+    .last-update {
+      font-size: 11px; color: #7a7f8c; margin-top: 5px; text-align: right;
+    }
+    /* Watch Demo Button */
+    .watch-demo-btn {
+      width: 100%;
+      background: linear-gradient(135deg,#2564cf 0%, #764ba2 100%);
+      color: #fff;
+      border-radius: var(--radius-sm);
       border: none;
-      border-radius: 50px;
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      z-index: 1002;
-      box-shadow: 0 6px 25px rgba(252, 61, 33, 0.5);
-      transition: all 0.3s ease;
-      letter-spacing: 1px;
-      animation: demoButtonPulse 2s ease-in-out infinite;
-    }
-    @keyframes demoButtonPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 6px 25px rgba(252, 61, 33, 0.5); }
-      50% { transform: scale(1.05); box-shadow: 0 8px 35px rgba(252, 61, 33, 0.8); }
-    }
-    .auto-demo-btn:hover {
-      transform: scale(1.1) !important;
-      box-shadow: 0 8px 35px rgba(252, 61, 33, 0.9) !important;
-    }
-    .demo-narration {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-      color: white;
-      padding: 30px 40px;
-      border-radius: 20px;
-      font-size: 24px;
+      padding: 11px 0;
+      font-size: 1.1rem;
       font-weight: 700;
-      text-align: center;
-      z-index: 2000;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      max-width: 600px;
-      line-height: 1.4;
+      margin-bottom: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(60,80,140,0.11);
+      transition: background 0.2s;
+      letter-spacing: .02em;
     }
-    .demo-narration.show {
-      opacity: 1;
+    .watch-demo-btn:hover {background: linear-gradient(135deg,#764ba2 0%, #2564cf 100%);}
+    /* Citizen Reports */
+    .citizen-panel .panel-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 9px;
+      display: flex; align-items: center; gap: 10px;
     }
-    @media (max-width: 768px) {
-      .control-panel { width: 90vw;}
-      .nasa-indicators { min-width: 140px; padding: 12px;}
-      #map { height: calc(100vh - 70px);}
+    .new-report-btn {
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      border: none;
+      padding: 7px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-left: auto;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .new-report-btn:hover {background: #194a98;}
+    .citizen-status-row {
+      display: flex; gap: 20px; margin: 10px 0;
+      font-size: 16px; font-weight: 700; color: #2564cf; justify-content: space-between;
+    }
+    .citizen-empty {
+      text-align: center; color: #888; font-size: 15px; margin: 16px 0 6px 0;
+    }
+    /* Historical Comparison */
+    .history-panel .panel-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 9px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .history-tabs {
+      display: flex; gap: 10px; margin-bottom: 10px;
+    }
+    .history-tab {
+      background: #f4f8fc;
+      color: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 5px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .history-tab.active, .history-tab:focus {
+      background: var(--primary);
+      color: #fff;
+    }
+    .history-chart-box {
+      background: #f7fafc;
+      border-radius: var(--radius-sm);
+      padding: 10px 7px 7px 7px;
+      margin-bottom: 7px;
+    }
+    .history-chart-title {
+      font-size: 13px; font-weight: 700; color: var(--secondary); margin-bottom: 3px;
+    }
+    .history-chart {
+      width: 100%; height: 66px; margin-top: 5px;
+      display: flex; align-items: flex-end; gap: 9px;
+    }
+    .growth-bar {
+      flex: 1;
+      background: linear-gradient(135deg, #7cd3ff 0%, #2564cf 100%);
+      border-radius: 6px 6px 0 0;
+      min-width: 7px;
+      transition: height 0.4s;
+    }
+    .infra-bar {
+      flex: 1;
+      background: linear-gradient(135deg, #b6ffd7 0%, #1fa878 100%);
+      border-radius: 6px 6px 0 0;
+      min-width: 7px;
+      transition: height 0.4s;
+    }
+    .made-by {
+      font-size: 10px; color: #888; text-align: right; margin-top: 3px;
+    }
+    @media (max-width: 1160px) {
+      .main-grid {flex-direction: column;}
+      .left-panel, .right-panel {max-width: 100vw; min-width: 0; width: 100vw;}
+      .map-panel {min-width: 0;}
+    }
+    @media (max-width: 900px) {
+      .main-grid {flex-direction: column;}
+      .left-panel, .right-panel {max-width: 100vw; min-width: 0; width: 100vw;}
+      .map-panel {min-width: 0;}
+      .header {flex-direction: column; height: auto; gap: 8px;}
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <div class="header">
-    <h1>🌍 Neo City Dashboard</h1>
-    <div class="subtitle">Smart Urban Planning with NASA Earth Observation Data</div>
-  </div>
-
-  <!-- Toggle Panel Button -->
-  <button class="toggle-panel" onclick="togglePanel()">☰</button>
-
-  <!-- Control Panel -->
-  <div class="control-panel" id="controlPanel">
-    <!-- NASA Data Section -->
-    <div class="panel-section">
-      <h3>🛰️ NASA Earth Data</h3>
-      <div style="font-size: 12px; line-height: 1.4;">
-        <p><strong>Real-time Environmental Monitoring:</strong></p>
-        <ul style="margin: 5px 0; padding-left: 15px;">
-          <li>MODIS Air Quality Index</li>
-          <li>Landsat Land Use Changes</li>
-          <li>GRACE Water Resources</li>
-          <li>VIIRS Night Lights (Urban Growth)</li>
-          <li>GPM Precipitation Data</li>
-        </ul>
+  <div class="dashboard-root">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <span class="logo">🌍</span>
+        <span class="title">Neo City Dashboard</span>
+        <span class="subtitle">NASA Earth Observation Analytics</span>
       </div>
-    </div>
-    <!-- Planning Tools Section -->
-    <div class="panel-section">
-      <h3>🏗️ Planning Tools</h3>
-      <button onclick="showAnalysis('healthcare')" class="planning-btn">🏥 Healthcare Access Analysis</button>
-      <button onclick="showAnalysis('transport')" class="planning-btn">🚌 Transportation Planning</button>
-      <button onclick="showAnalysis('green')" class="planning-btn">🌳 Green Space Optimization</button>
-      <button onclick="showAnalysis('flood')" class="planning-btn">🌊 Flood Risk Assessment</button>
-      <button onclick="showAnalysis('growth')" class="planning-btn">📈 Urban Growth Projection</button>
-      <button onclick="showAnalysis('reset')" class="planning-btn">🔄 Reset Highlights</button>
-    </div>
-    <!-- Stakeholder Engagement -->
-    <div class="panel-section">
-      <h3>👥 Stakeholder Involvement</h3>
-      <div style="font-size: 12px;">
-        <p><strong>City Departments:</strong></p>
-        <ul style="margin: 5px 0; padding-left: 15px;">
-          <li>Parks & Recreation</li>
-          <li>Public Health</li>
-          <li>Transportation</li>
-          <li>Water Management</li>
-          <li>Emergency Services</li>
-        </ul>
-        <p><strong>Community Input:</strong> Citizen reporting system for local insights</p>
+      <div class="header-status">
+        <span class="status-indicator"><span class="dot"></span>Live Data</span>
+        <span class="alert-indicator"><span class="dot"></span>1 Alert</span>
       </div>
-    </div>
-    <!-- Priority Actions -->
-    <div class="panel-section">
-      <h3>⚡ Priority Actions</h3>
-      <div id="priorityActions" style="font-size: 12px;">
-        <div style="padding: 8px; margin: 5px 0; background: #ffebee; border-left: 4px solid #f44336;">
-          <strong>Ward 4 - Gajuwaka:</strong> Immediate air quality intervention needed
+      <div class="header-controls">
+        <button class="icon-btn" title="Dark mode"><span>🌙</span></button>
+        <button class="icon-btn" title="Settings"><span>⚙️</span></button>
+        <button class="icon-btn" title="Notifications"><span>🚨</span></button>
+      </div>
+    </header>
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+      <!-- LEFT PANEL -->
+      <aside class="left-panel">
+        <div class="metrics-panel panel">
+          <div class="panel-title">📊 Live Environmental Metrics</div>
+          <div class="panel-tabs">
+            <button class="panel-tab active">CURRENT</button>
+            <button class="panel-tab">24H</button>
+            <button class="panel-tab">7D</button>
+          </div>
+          <div class="panel-tabs" style="margin-bottom: 14px; margin-top: -8px;">
+            <button class="panel-tab active">Overview</button>
+            <button class="panel-tab">Environment</button>
+            <button class="panel-tab">Carbon</button>
+            <button class="panel-tab">Predictions</button>
+          </div>
+          <div class="metrics-cards">
+            <div class="metric-card">
+              <span class="metric-label">Air Quality Index</span>
+              <span class="metric-value danger">125 <span class="metric-badge">Unhealthy</span></span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Temperature</span>
+              <span class="metric-value warning">-- <span style="font-size:13px; color:#d35400;">+2.3°</span></span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Green Cover</span>
+              <span class="metric-value success">--% <span style="font-size:13px; color:#4caf50;">0%</span></span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Water Quality</span>
+              <span class="metric-value warning">--/10 <span style="font-size:13px; color:#e2b007;">N/A</span></span>
+            </div>
+          </div>
+          <div class="trend-panel">
+            <div class="trend-title">📈 6-Month Trend</div>
+            <div class="trend-chart">
+              <div class="trend-bar" style="height: 66%;"></div>
+              <div class="trend-bar" style="height: 69%;"></div>
+              <div class="trend-bar" style="height: 73%;"></div>
+              <div class="trend-bar" style="height: 78%;"></div>
+              <div class="trend-bar" style="height: 82%;"></div>
+              <div class="trend-bar" style="height: 80%;"></div>
+            </div>
+          </div>
         </div>
-        <div style="padding: 8px; margin: 5px 0; background: #fff3e0; border-left: 4px solid #ff9800;">
-          <strong>Ward 12 - Araku Valley:</strong> Healthcare access improvement required
+      </aside>
+      <!-- MAP PANEL -->
+      <section class="map-panel">
+        <div id="map"></div>
+        <div class="nasa-layers-control">
+          <div class="nasa-layers-title">🛰️ NASA Data Layers</div>
+          <div class="nasa-layers-list">
+            <label><input type="checkbox" /> Heat Islands</label>
+            <label><input type="checkbox" /> Population Density</label>
+            <label><input type="checkbox" /> Infrastructure</label>
+          </div>
         </div>
-        <div style="padding: 8px; margin: 5px 0; background: #e8f5e8; border-left: 4px solid #4caf50;">
-          <strong>Ward 5 - Rushikonda:</strong> Sustainable development model
+      </section>
+      <!-- RIGHT PANEL -->
+      <aside class="right-panel">
+        <div class="live-data-panel panel">
+          <div class="live-data-header">📡 Live Data Stream</div>
+          <div class="live-data-indicator">
+            <span><span class="live-dot"></span>Live Satellite Feed</span>
+            <span style="font-size:12px; color:#888;">NASA</span>
+          </div>
+          <div class="nasa-sats">
+            <span class="sat-badge">🛰️ MODIS</span>
+            <span class="sat-badge">🛰️ Landsat-9</span>
+            <span class="sat-badge">🛰️ GRACE-FO</span>
+            <span class="sat-badge">🛰️ VIIRS</span>
+            <span class="sat-badge">🛰️ GPM</span>
+          </div>
+          <div class="live-indicators-list">
+            <div class="indicator-row">
+              <span>Air Quality Index</span>
+              <span class="indicator-value ind-bad">125</span>
+            </div>
+            <div class="indicator-row">
+              <span>Water Availability</span>
+              <span class="indicator-value ind-good">92%</span>
+            </div>
+            <div class="indicator-row">
+              <span>Surface Temp (LST)</span>
+              <span class="indicator-value ind-bad">+2.3°</span>
+            </div>
+            <div class="indicator-row">
+              <span>Vegetation Index</span>
+              <span class="indicator-value ind-moderate">0.68</span>
+            </div>
+            <div class="indicator-row">
+              <span>Precipitation</span>
+              <span class="indicator-value ind-excellent">12mm</span>
+            </div>
+          </div>
+          <div class="last-update">Last updated: Just now</div>
         </div>
-      </div>
+        <button class="watch-demo-btn">▶️ Watch Demo</button>
+        <div class="citizen-panel panel">
+          <div class="panel-title">
+            <span>📱 Citizen Reports</span>
+            <button class="new-report-btn">New Report</button>
+          </div>
+          <div class="citizen-status-row">
+            <span>0 Pending</span>
+            <span>0 In Progress</span>
+            <span>0 Resolved</span>
+          </div>
+          <div class="citizen-empty">
+            <span style="font-size: 2.1em; display:block;">📱</span>
+            No citizen reports yet<br>
+            <span style="font-size: 13px;">Be the first to report an issue</span>
+          </div>
+        </div>
+        <div class="history-panel panel">
+          <div class="panel-title">🕑 Historical Comparison</div>
+          <div class="history-tabs">
+            <button class="history-tab active">Growth</button>
+            <button class="history-tab">Infrastructure</button>
+          </div>
+          <div class="history-chart-box">
+            <div class="history-chart-title">📊 Urban Development Trends (2010-2025)</div>
+            <div class="history-chart">
+              <div class="growth-bar" style="height: 28%;"></div>
+              <div class="growth-bar" style="height: 34%;"></div>
+              <div class="growth-bar" style="height: 44%;"></div>
+              <div class="growth-bar" style="height: 55%;"></div>
+              <div class="growth-bar" style="height: 61%;"></div>
+              <div class="growth-bar" style="height: 72%;"></div>
+              <div class="growth-bar" style="height: 80%;"></div>
+            </div>
+          </div>
+          <div class="made-by">Made with Emergent</div>
+        </div>
+      </aside>
     </div>
   </div>
-
-  <!-- WOW: ANIMATED NASA DATA STREAM -->
-  <div class="nasa-indicators" id="nasaIndicators">
-    <div class="nasa-logo-badge">🚀 NASA EARTH DATA</div>
-    <div style="text-align: center; margin: 10px 0; font-size: 10px; color: #666;">
-      <span class="live-dot"></span><strong>LIVE SATELLITE FEED</strong>
-    </div>
-    
-    <!-- Active Satellites -->
-    <div style="margin: 10px 0;">
-      <span class="satellite-badge"><span class="satellite-icon">🛰️</span> MODIS</span>
-      <span class="satellite-badge"><span class="satellite-icon">🛰️</span> Landsat-9</span>
-      <span class="satellite-badge"><span class="satellite-icon">🛰️</span> GRACE-FO</span>
-      <span class="satellite-badge"><span class="satellite-icon">🛰️</span> VIIRS</span>
-      <span class="satellite-badge"><span class="satellite-icon">🛰️</span> GPM</span>
-    </div>
-
-    <!-- Live Data Indicators -->
-    <div class="indicator indicator-animated">
-      <span style="font-size: 11px;"><strong>Air Quality Index</strong><br><small style="color: #666;">MODIS Terra/Aqua</small></span>
-      <span class="indicator-value moderate" id="aqi-value">AQI 85</span>
-    </div>
-    <div class="indicator indicator-animated">
-      <span style="font-size: 11px;"><strong>Water Availability</strong><br><small style="color: #666;">GRACE-FO</small></span>
-      <span class="indicator-value good" id="water-value">92%</span>
-    </div>
-    <div class="indicator indicator-animated">
-      <span style="font-size: 11px;"><strong>Surface Temp (LST)</strong><br><small style="color: #666;">Landsat 8/9</small></span>
-      <span class="indicator-value poor" id="temp-value">34.2°C</span>
-    </div>
-    <div class="indicator indicator-animated">
-      <span style="font-size: 11px;"><strong>Vegetation Index</strong><br><small style="color: #666;">MODIS NDVI</small></span>
-      <span class="indicator-value moderate" id="ndvi-value">0.68</span>
-    </div>
-    <div class="indicator indicator-animated">
-      <span style="font-size: 11px;"><strong>Precipitation</strong><br><small style="color: #666;">GPM IMERG</small></span>
-      <span class="indicator-value excellent" id="precip-value">12mm</span>
-    </div>
-    
-    <div style="font-size: 9px; color: #999; text-align: center; margin-top: 10px;">
-      Last updated: <span id="lastUpdate">Just now</span>
-    </div>
-  </div>
-
-  <!-- Map Container -->
-  <div id="map"></div>
-
-  <!-- Citizen Reporting -->
-  <div class="citizen-report">
-    <button class="report-btn" onclick="alert('Citizen reporting is not yet implemented.');">📱 Report Issue</button>
-  </div>
-
-  <!-- WOW: Visualization Toggle Button -->
-  <button class="viz-toggle-btn" onclick="toggleViz()">📊</button>
-
-  <!-- WOW: AUTO-DEMO MODE Button -->
-  <button class="auto-demo-btn" onclick="startAutoDemo()" id="demoBtn">▶️ AUTO DEMO</button>
-  
-  <!-- Demo Narration Overlay -->
-  <div class="demo-narration" id="demoNarration"></div>
-
-  <!-- WOW: Interactive Data Visualization Dashboard -->
-  <div class="viz-dashboard" id="vizDashboard">
-    <h3 class="viz-header">📊 IMPACT ANALYTICS</h3>
-    
-    <!-- Impact Metrics -->
-    <div class="metric-card" title="Real-time impact based on NASA MODIS air quality data and GPM precipitation patterns">
-      <div>
-        <div class="metric-value" id="livesImpacted">12,500</div>
-        <div class="metric-label">Lives Improved</div>
-        <div style="font-size: 8px; margin-top: 3px; opacity: 0.8;">📡 MODIS + GPM Data</div>
-      </div>
-      <div style="font-size: 32px;">👥</div>
-    </div>
-    
-    <div class="metric-card" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);" title="Pollution reduction calculated from MODIS Terra/Aqua AOD measurements and urban planning interventions">
-      <div>
-        <div class="metric-value" id="pollutionReduced">23%</div>
-        <div class="metric-label">Pollution Reduced</div>
-        <div style="font-size: 8px; margin-top: 3px; opacity: 0.8;">📡 MODIS AOD Analysis</div>
-      </div>
-      <div style="font-size: 32px;">🌱</div>
-    </div>
-
-    <!-- Air Quality Trend Chart -->
-    <div class="chart-container" title="24-hour air quality trend derived from MODIS Terra/Aqua Aerosol Optical Depth (AOD) measurements">
-      <div class="chart-title">📈 AIR QUALITY TREND (24h) <small style="color: #999;">• MODIS AOD</small></div>
-      <svg class="line-chart" viewBox="0 0 100 30" preserveAspectRatio="none">
-        <polyline class="line-path" points="0,25 14,20 28,22 42,15 56,18 70,12 84,14 100,10" />
-      </svg>
-      <div style="font-size: 9px; color: #666; text-align: center; margin-top: 5px;">
-        ✅ Improving 18% (NASA MODIS Terra/Aqua)
-      </div>
-    </div>
-
-    <!-- Resource Allocation Efficiency -->
-    <div class="chart-container" title="Resource allocation efficiency powered by multi-satellite data: Landsat (urban growth), GRACE (water), VIIRS (infrastructure)">
-      <div class="chart-title">⚡ RESOURCE EFFICIENCY <small style="color: #999;">• Multi-Satellite</small></div>
-      <div class="bar-chart" id="resourceChart">
-        <div class="bar" style="height: 85%;" title="Healthcare: 85% efficiency (VIIRS night lights + population data)"></div>
-        <div class="bar" style="height: 70%;" title="Transport: 70% efficiency (Landsat urban analysis)"></div>
-        <div class="bar" style="height: 92%;" title="Water: 92% efficiency (GRACE-FO water availability)"></div>
-        <div class="bar" style="height: 78%;" title="Green Space: 78% efficiency (MODIS NDVI vegetation)"></div>
-        <div class="bar" style="height: 88%;" title="Energy: 88% efficiency (VIIRS + Landsat thermal)"></div>
-      </div>
-      <div style="font-size: 9px; color: #666; text-align: center; margin-top: 8px;">
-        Healthcare • Transport • Water • Green • Energy
-      </div>
-      <div style="font-size: 8px; color: #999; text-align: center; margin-top: 3px;">
-        📡 Landsat-9 | GRACE-FO | VIIRS | MODIS
-      </div>
-    </div>
-
-    <div style="font-size: 10px; color: #999; text-align: center; margin-top: 10px;">
-      🚀 Powered by NASA Earth Observation Data
-    </div>
-  </div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
-  <!-- App Logic -->
-  <script src="app.js"></script>
+  <!-- MAP JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // UI panel toggle logic
-    function togglePanel() {
-      const panel = document.getElementById('controlPanel');
-      panel.classList.toggle('open');
-    }
-
-    // WOW FACTOR: Live NASA Data Animation System
-    function updateNASAData() {
-      // Simulate live satellite data updates
-      const dataUpdates = {
-        aqi: {
-          el: document.getElementById('aqi-value'),
-          values: [78, 82, 85, 88, 91, 85, 80],
-          format: (v) => `AQI ${v}`,
-          classes: (v) => v > 85 ? 'poor' : v > 75 ? 'moderate' : 'good'
-        },
-        water: {
-          el: document.getElementById('water-value'),
-          values: [88, 90, 92, 94, 91, 89],
-          format: (v) => `${v}%`,
-          classes: (v) => v > 90 ? 'excellent' : v > 80 ? 'good' : 'moderate'
-        },
-        temp: {
-          el: document.getElementById('temp-value'),
-          values: [33.8, 34.0, 34.2, 34.5, 34.3, 33.9],
-          format: (v) => `${v.toFixed(1)}°C`,
-          classes: (v) => v > 34 ? 'poor' : v > 32 ? 'moderate' : 'good'
-        },
-        ndvi: {
-          el: document.getElementById('ndvi-value'),
-          values: [0.65, 0.67, 0.68, 0.70, 0.69, 0.66],
-          format: (v) => v.toFixed(2),
-          classes: (v) => v > 0.7 ? 'excellent' : v > 0.6 ? 'moderate' : 'poor'
-        },
-        precip: {
-          el: document.getElementById('precip-value'),
-          values: [10, 11, 12, 13, 12, 11],
-          format: (v) => `${v}mm`,
-          classes: () => 'excellent'
-        }
-      };
-
-      let updateIndex = 0;
-
-      setInterval(() => {
-        Object.keys(dataUpdates).forEach(key => {
-          const data = dataUpdates[key];
-          const newValue = data.values[updateIndex % data.values.length];
-          
-          // Add animation class
-          data.el.classList.add('indicator-value-animated');
-          
-          // Update value and class
-          setTimeout(() => {
-            data.el.textContent = data.format(newValue);
-            data.el.className = 'indicator-value ' + data.classes(newValue);
-          }, 100);
-
-          // Remove animation class
-          setTimeout(() => {
-            data.el.classList.remove('indicator-value-animated');
-          }, 600);
-        });
-
-        // Update timestamp
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        document.getElementById('lastUpdate').textContent = timeStr;
-
-        updateIndex++;
-      }, 3000); // Update every 3 seconds
-    }
-
-    // Start NASA data updates when page loads
-    setTimeout(updateNASAData, 2000);
-
-    // WOW FACTOR: Interactive Visualization Dashboard Toggle
-    function toggleViz() {
-      const dashboard = document.getElementById('vizDashboard');
-      dashboard.classList.toggle('open');
-    }
-
-    // WOW FACTOR: LIVE Animated Impact Metrics with Continuous Updates
-    function animateMetrics() {
-      const livesEl = document.getElementById('livesImpacted');
-      const pollutionEl = document.getElementById('pollutionReduced');
-      
-      // Initial animation
-      let livesCount = 12500;
-      let pollutionPercent = 23;
-      
-      livesEl.textContent = livesCount.toLocaleString();
-      pollutionEl.textContent = pollutionPercent + '%';
-      
-      // Continuously update metrics every 4 seconds to simulate real-time impact
-      setInterval(() => {
-        // Simulate lives improved growing based on interventions
-        livesCount += Math.floor(Math.random() * 150 + 50); // +50 to +200
-        livesEl.classList.add('indicator-value-animated');
-        setTimeout(() => {
-          livesEl.textContent = livesCount.toLocaleString();
-          livesEl.classList.remove('indicator-value-animated');
-        }, 100);
-        
-        // Simulate pollution reduction improving (MODIS data driven)
-        const change = (Math.random() - 0.3) * 2; // Bias towards improvement
-        pollutionPercent = Math.max(15, Math.min(30, pollutionPercent + change));
-        pollutionEl.classList.add('indicator-value-animated');
-        setTimeout(() => {
-          pollutionEl.textContent = Math.round(pollutionPercent) + '%';
-          pollutionEl.classList.remove('indicator-value-animated');
-        }, 100);
-      }, 4000);
-    }
-
-    // WOW FACTOR: Animate Charts with Live Data Updates
-    function animateCharts() {
-      const bars = document.querySelectorAll('#resourceChart .bar');
-      const linePath = document.querySelector('.line-path');
-      
-      // Update bar charts
-      setInterval(() => {
-        bars.forEach(bar => {
-          // Simulate resource allocation changes
-          const currentHeight = parseInt(bar.style.height);
-          const change = (Math.random() - 0.5) * 10; // ±5%
-          const newHeight = Math.max(60, Math.min(95, currentHeight + change));
-          bar.style.height = newHeight + '%';
-        });
-      }, 5000); // Update every 5 seconds
-      
-      // Update line chart with new air quality data points
-      setInterval(() => {
-        // Generate new MODIS-based air quality trend (improving over time)
-        const points = [];
-        let y = 25 - (Math.random() * 3); // Start point
-        for (let i = 0; i <= 100; i += 14) {
-          y = Math.max(5, y - (Math.random() * 4) + 1); // Trending downward (improving)
-          points.push(`${i},${y}`);
-        }
-        const newPath = points.join(' ');
-        
-        // Reset animation and update path
-        linePath.style.strokeDashoffset = '300';
-        linePath.setAttribute('points', newPath);
-        
-        // Trigger re-animation
-        setTimeout(() => {
-          linePath.style.strokeDashoffset = '0';
-        }, 50);
-      }, 6000); // Update every 6 seconds to show live MODIS data
-    }
-
-    // Start all animations
-    setTimeout(() => {
-      animateMetrics();
-      animateCharts();
-    }, 1000);
-
-    // WOW FACTOR: AUTO-DEMO MODE - FULLY INTERACTIVE Guided Tour
-    let demoRunning = false;
-    let demoTimeouts = [];
-    
-    function showNarration(text, duration = 3000) {
-      const narration = document.getElementById('demoNarration');
-      narration.innerHTML = text.replace(/\n/g, '<br>');
-      narration.classList.add('show');
-      setTimeout(() => {
-        narration.classList.remove('show');
-      }, duration);
-    }
-    
-    function flashElement(elementId) {
-      const el = document.getElementById(elementId);
-      if (el) {
-        el.style.animation = 'pulse 0.5s ease-in-out 3';
-        setTimeout(() => { el.style.animation = ''; }, 1500);
-      }
-    }
-    
-    function startAutoDemo() {
-      if (demoRunning) return;
-      demoRunning = true;
-      
-      const demoBtn = document.getElementById('demoBtn');
-      demoBtn.textContent = '⏸️ DEMO RUNNING';
-      demoBtn.style.animation = 'none';
-      
-      // Ensure starting state
-      document.getElementById('vizDashboard').classList.remove('open');
-      document.getElementById('controlPanel').classList.remove('open');
-      showAnalysis('reset');
-      
-      // Clear any previous demo timeouts
-      demoTimeouts.forEach(t => clearTimeout(t));
-      demoTimeouts = [];
-      
-      // INTERACTIVE DEMO SCRIPT
-      demoTimeouts.push(setTimeout(() => {
-        showNarration('🚀 <strong>Welcome to Neo City Dashboard</strong><br>Powered by NASA Earth Observation Data', 3000);
-      }, 500));
-      
-      demoTimeouts.push(setTimeout(() => {
-        flashElement('nasaIndicators');
-        showNarration('📡 <strong>Live Satellite Data Stream</strong><br>MODIS • Landsat-9 • GRACE-FO • VIIRS • GPM<br><em>Watch the values update in real-time!</em>', 4000);
-      }, 4000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        document.getElementById('vizDashboard').classList.add('open');
-        flashElement('vizDashboard');
-        showNarration('📊 <strong>Real-Time Impact Analytics</strong><br>12,500+ Lives Improved • 23% Pollution Reduced<br><em>All metrics update live!</em>', 4000);
-      }, 9000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        showAnalysis('healthcare');
-        map.setView([17.95, 83.15], 10);
-        showNarration('🏥 <strong>Healthcare Access Analysis</strong><br>Ward 12: 15.2km to nearest facility<br><em>NASA VIIRS identifies infrastructure gaps</em>', 4000);
-      }, 14000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        showAnalysis('green');
-        map.setView([17.665, 83.21], 11);
-        showNarration('🌳 <strong>Green Space Optimization</strong><br>Urban heat island mitigation<br><em>MODIS NDVI vegetation analysis</em>', 4000);
-      }, 19000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        showAnalysis('flood');
-        map.setView([17.75, 83.35], 10);
-        showNarration('🌊 <strong>Flood Risk Assessment</strong><br>Protecting coastal communities<br><em>GPM precipitation + elevation data</em>', 4000);
-      }, 24000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        showAnalysis('growth');
-        map.setView([17.71, 83.32], 11);
-        showNarration('📈 <strong>Urban Growth Projection</strong><br>Sustainable expansion planning<br><em>Landsat-9 land use analysis</em>', 4000);
-      }, 29000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        document.getElementById('controlPanel').classList.add('open');
-        flashElement('controlPanel');
-        showNarration('👥 <strong>Multi-Stakeholder Platform</strong><br>5 City Departments • Community Input<br><em>Evidence-based collaborative decisions</em>', 4000);
-      }, 34000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        map.setView([17.6868, 83.2185], 10);
-        showNarration('🌍 <strong>Globally Scalable Solution</strong><br>Applicable to any city worldwide<br><em>NASA data covers the entire planet</em>', 4000);
-      }, 39000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        showNarration('✅ <strong>NASA Space Apps Challenge</strong><br>Evidence-Based Urban Planning<br><strong>Thank you for watching!</strong>', 4000);
-      }, 44000));
-      
-      demoTimeouts.push(setTimeout(() => {
-        // Complete reset
-        showAnalysis('reset');
-        document.getElementById('vizDashboard').classList.remove('open');
-        document.getElementById('controlPanel').classList.remove('open');
-        map.setView([17.6868, 83.2185], 10);
-        demoBtn.textContent = '▶️ REPLAY DEMO';
-        demoBtn.style.animation = 'demoButtonPulse 2s ease-in-out infinite';
-        demoRunning = false;
-      }, 49000));
-    }
-
-    console.log('🚀 NASA Live Data Stream Activated!');
-    console.log('📊 Impact Analytics Dashboard Ready!');
-    console.log('🎬 Auto-Demo Mode Available - Click to showcase all features!');
+    // Basic map init
+    var map = L.map('map').setView([17.6868, 83.2185], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data © OpenStreetMap contributors'
+    }).addTo(map);
   </script>
 </body>
 </html>
-       
-    
